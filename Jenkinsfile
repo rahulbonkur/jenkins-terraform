@@ -1,25 +1,10 @@
 pipeline {
     agent any
 
-    environment {
-        AWS_DEFAULT_REGION = "ap-south-1"
-    }
-
     stages {
-
-        stage('Checkout Code') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/USERNAME/terraform-aws-infra.git'
-            }
-        }
-
         stage('Terraform Init') {
             steps {
-                sh '''
-                  terraform init \
-                  -backend-config="bucket=terraform-dev-state"
-                '''
+                sh 'terraform init'
             }
         }
 
@@ -31,23 +16,20 @@ pipeline {
 
         stage('Terraform Plan') {
             steps {
-                sh 'terraform plan -var-file=terraform.tfvars'
+                sh 'terraform plan'
             }
         }
 
         stage('Terraform Apply') {
             steps {
-                sh 'terraform apply -var-file=terraform.tfvars -auto-approve'
+                sh 'terraform apply -auto-approve'
             }
         }
     }
 
     post {
-        success {
-            echo "✅ Infrastructure created successfully"
-        }
         failure {
-            echo "❌ Infrastructure creation failed"
+            echo '❌ Infrastructure creation failed'
         }
     }
 }
